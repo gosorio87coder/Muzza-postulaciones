@@ -55,6 +55,7 @@ const App: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
       const generatedQuestions = await generateInterviewQuestions();
       setQuestions(generatedQuestions);
 
@@ -145,9 +146,7 @@ const App: React.FC = () => {
     if (!questions) return false;
 
     const allAnswered = (answers: (string | undefined)[]) =>
-      answers.every(
-        (answer) => answer && answer.trim() !== ""
-      );
+      answers.every((answer) => answer && answer.trim() !== "");
 
     return (
       allAnswered(formData.answers.customerService) &&
@@ -162,9 +161,7 @@ const App: React.FC = () => {
     e.preventDefault();
 
     if (!isFormValid) {
-      alert(
-        "Por favor, completa todos los campos requeridos."
-      );
+      alert("Por favor, completa todos los campos requeridos.");
       return;
     }
 
@@ -180,12 +177,10 @@ const App: React.FC = () => {
     const structuredData = {
       ...formData,
       questions: {
-        customerService: questions.customerService.map(
-          (q, i) => ({
-            question: q,
-            answer: formData.answers.customerService[i],
-          })
-        ),
+        customerService: questions.customerService.map((q, i) => ({
+          question: q,
+          answer: formData.answers.customerService[i],
+        })),
         salesAptitude: questions.salesAptitude.map((q, i) => ({
           question: q,
           answer: formData.answers.salesAptitude[i],
@@ -194,31 +189,24 @@ const App: React.FC = () => {
     };
 
     try {
-      const response = await fetch(
-        "https://formspree.io/f/xnnoejrq",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(structuredData, null, 2),
-        }
-      );
+      const response = await fetch("https://formspree.io/f/xnnoejrq", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(structuredData, null, 2),
+      });
 
       if (response.ok) {
         setSubmitted(true);
       } else {
-        const errorData = await response
-          .json()
-          .catch(() => null);
+        const errorData = await response.json().catch(() => null);
         console.error(
           "Error Formspree:",
           errorData || response.statusText
         );
-        throw new Error(
-          "Hubo un problema al enviar tu postulación."
-        );
+        throw new Error("Hubo un problema al enviar tu postulación.");
       }
     } catch (error) {
       console.error("Error al enviar el formulario:", error);
@@ -243,9 +231,32 @@ const App: React.FC = () => {
     [formData.dni]
   );
 
+  const shareUrl = "https://muzza-postulaciones.vercel.app/";
+
+  const handleCopyLink = () => {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(shareUrl)
+        .then(() => {
+          alert(
+            "Link copiado. Puedes pegarlo en WhatsApp o donde prefieras."
+          );
+        })
+        .catch(() => {
+          alert(
+            "No se pudo copiar el link. Copia la URL manualmente, por favor."
+          );
+        });
+    } else {
+      alert(
+        "Tu navegador no permite copiar automáticamente. Copia el link manualmente, por favor."
+      );
+    }
+  };
+
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-pink-50/40">
         <div className="max-w-2xl w-full bg-white p-8 rounded-lg shadow-xl text-center">
           <h2 className="text-3xl font-bold text-pink-600 mb-4">
             ¡Gracias por postular!
@@ -256,8 +267,8 @@ const App: React.FC = () => {
           </p>
 
           <p className="text-gray-700 mb-2">
-            <strong>Para completar tu postulación</strong>, envía
-            tu CV en PDF al correo:
+            <strong>Para completar tu postulación</strong>, envía tu CV
+            en PDF al correo:
           </p>
 
           <p className="text-pink-600 font-semibold mb-2">
@@ -271,31 +282,37 @@ const App: React.FC = () => {
             </a>
           </p>
 
-          <p className="text-gray-700 mb-6">
+          <p className="text-gray-700 mb-4">
             usando como asunto:&nbsp;
             <span className="font-mono bg-pink-50 px-2 py-1 rounded border border-pink-100">
               {emailSubject}
             </span>
           </p>
 
-          <p className="text-xs text-gray-500 mb-6">
+          <p className="text-xs text-gray-500 mb-8">
             Ejemplo: si tu DNI es 12345678, el asunto será{" "}
-            <span className="font-mono">
-              12345678 - Muzza atención
-            </span>
-            .
+            <span className="font-mono">12345678 - Muzza atención</span>.
           </p>
 
-          <button
-            onClick={() => {
-              setSubmitted(false);
-              setFormData(initialFormData);
-              fetchQuestions();
-            }}
-            className="mt-2 bg-pink-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-pink-600 transition duration-300"
-          >
-            Enviar otra postulación
-          </button>
+          <div className="border-t border-pink-100 pt-6 mt-4">
+            <p className="text-gray-700 mb-3">
+              Si quieres enviarle esta oportunidad a una amiga, compártele
+              este link:
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <code className="text-xs sm:text-sm bg-pink-50 px-3 py-2 rounded border border-pink-100 break-all">
+                {shareUrl}
+              </code>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="bg-pink-500 text-white text-sm font-semibold py-2 px-4 rounded-lg shadow hover:bg-pink-600 transition-colors"
+              >
+                Copiar link
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -387,9 +404,7 @@ const App: React.FC = () => {
               <CollapsibleFieldset
                 title="Experiencia en Atención al Cliente"
                 isOpen={openSections.customerService}
-                onToggle={() =>
-                  handleToggleSection("customerService")
-                }
+                onToggle={() => handleToggleSection("customerService")}
               >
                 <div className="space-y-6">
                   {questions.customerService.map((q, i) => (
@@ -397,9 +412,7 @@ const App: React.FC = () => {
                       key={`cs-${i}`}
                       label={`${i + 1}. ${q}`}
                       name={`cs-${i}`}
-                      value={
-                        formData.answers.customerService[i] || ""
-                      }
+                      value={formData.answers.customerService[i] || ""}
                       onChange={(e) =>
                         handleAnswerChange(
                           "customerService",
@@ -416,9 +429,7 @@ const App: React.FC = () => {
               <CollapsibleFieldset
                 title="Actitud y Aptitud para Ventas"
                 isOpen={openSections.salesAptitude}
-                onToggle={() =>
-                  handleToggleSection("salesAptitude")
-                }
+                onToggle={() => handleToggleSection("salesAptitude")}
               >
                 <div className="space-y-6">
                   {questions.salesAptitude.map((q, i) => (
@@ -426,9 +437,7 @@ const App: React.FC = () => {
                       key={`sa-${i}`}
                       label={`${i + 1}. ${q}`}
                       name={`sa-${i}`}
-                      value={
-                        formData.answers.salesAptitude[i] || ""
-                      }
+                      value={formData.answers.salesAptitude[i] || ""}
                       onChange={(e) =>
                         handleAnswerChange(
                           "salesAptitude",
@@ -447,21 +456,17 @@ const App: React.FC = () => {
           <CollapsibleFieldset
             title="Sobre el Puesto y Tú"
             isOpen={openSections.motivation}
-            onToggle={() =>
-              handleToggleSection("motivation")
-            }
+            onToggle={() => handleToggleSection("motivation")}
           >
             <div className="text-gray-700 space-y-4 mb-8 text-sm">
               <h3 className="text-base font-semibold text-gray-800">
                 Propósito
               </h3>
               <p>
-                Ser la primera cara del estudio (presencial y
-                digital) y la dueña de los canales de contacto.
-                El éxito depende de convertir las consultas en
-                reservas con nuestras especialistas, guiando a
-                los prospectos con mucha empatía, amabilidad y
-                claridad.
+                Ser la primera cara del estudio (presencial y digital) y la
+                dueña de los canales de contacto. El éxito depende de convertir
+                las consultas en reservas con nuestras especialistas, guiando a
+                los prospectos con mucha empatía, amabilidad y claridad.
               </p>
 
               <h3 className="text-base font-semibold text-gray-800 pt-2">
@@ -469,42 +474,39 @@ const App: React.FC = () => {
               </h3>
               <ul className="list-disc list-inside space-y-1 pl-2">
                 <li>
-                  Atención omnicanal (usando un sistema CRM)
-                  cumpliendo los tiempos de respuesta máximos
-                  establecidos.
+                  Atención omnicanal (usando un sistema CRM) cumpliendo los
+                  tiempos de respuesta máximos establecidos.
                 </li>
                 <li>
-                  Descubrimiento y calificación: entender el
-                  caso (dolor, expectativas, antecedentes)
-                  clasificarlo y priorizarlo.
+                  Descubrimiento y calificación: entender el caso (dolor,
+                  expectativas, antecedentes) clasificarlo y priorizarlo.
                 </li>
                 <li>
-                  Cierre de cita: proponer el procedimiento
-                  adecuado y resolver objeciones. Agendar y
-                  enviar pre/post instrucciones según el caso.
+                  Cierre de cita: proponer el procedimiento adecuado y resolver
+                  objeciones. Agendar y enviar pre/post instrucciones según el
+                  caso.
                 </li>
                 <li>
-                  Seguimiento inteligente: recordatorios,
-                  lista de espera, reactivación de prospectos
-                  fríos.
+                  Seguimiento inteligente: recordatorios, lista de espera,
+                  reactivación de prospectos fríos.
                 </li>
                 <li>
-                  Gestión en CRM: registrar las interacciones,
-                  actualizar etapas, etiquetas, motivos de
-                  pérdida y tareas para poder tener reportes.
+                  Gestión en CRM: registrar las interacciones, actualizar
+                  etapas, etiquetas, motivos de pérdida y tareas para poder
+                  tener reportes.
                 </li>
                 <li>
-                  Mejora continua: aportar guiones, FAQs,
-                  ideas para experimentos, feedback.
+                  Mejora continua: aportar guiones, FAQs, ideas para
+                  experimentos, feedback.
                 </li>
                 <li>
-                  Calidad de servicio: mantener tono cálido,
-                  ortografía impecable, coherencia visual y
-                  cuidar la reputación de la marca.
+                  Calidad de servicio: mantener tono cálido, ortografía
+                  impecable, coherencia visual y cuidar la reputación de la
+                  marca.
                 </li>
                 <li>
-                  Colaboración: coordinar con especialistas:
-                  agenda, bloqueos, tiempos y testimonios.
+                  Colaboración: coordinar con especialistas: agenda, bloqueos,
+                  tiempos y testimonios.
                 </li>
               </ul>
 
@@ -512,10 +514,9 @@ const App: React.FC = () => {
                 Herramientas
               </h3>
               <p>
-                Te brindaremos las mejores herramientas de
-                tecnología para hacer las funciones de manera
-                enfocada: CRM, IA, Sheets, sistema de reservas
-                y ventas.
+                Te brindaremos las mejores herramientas de tecnología para hacer
+                las funciones de manera enfocada: CRM, IA, Sheets, sistema de
+                reservas y ventas.
               </p>
 
               <h3 className="text-base font-semibold text-gray-800 pt-2">
@@ -523,27 +524,23 @@ const App: React.FC = () => {
               </h3>
               <ul className="list-disc list-inside space-y-1 pl-2">
                 <li>
-                  Empatía genuina y escucha activa (entiende
-                  el dolor de los clientes).
+                  Empatía genuina y escucha activa (entiende el dolor de los
+                  clientes).
                 </li>
                 <li>
-                  Redacción persuasiva y clara (español
-                  impecable).
+                  Redacción persuasiva y clara (español impecable).
                 </li>
                 <li>
-                  Vendedora consultiva (orientada a soluciones,
-                  no a “copiar y pegar”).
+                  Vendedora consultiva (orientada a soluciones, no a “copiar y
+                  pegar”).
+                </li>
+                <li>Orden/constancia: vive en el CRM.</li>
+                <li>
+                  Tolerancia a la presión, actitud proactiva y aprendizaje
+                  rápido.
                 </li>
                 <li>
-                  Orden/constancia: vive en el CRM.
-                </li>
-                <li>
-                  Tolerancia a la presión, actitud proactiva y
-                  aprendizaje rápido.
-                </li>
-                <li>
-                  Deseable: experiencia en
-                  belleza/salud/servicios y manejo de
+                  Deseable: experiencia en belleza/salud/servicios y manejo de
                   objeciones.
                 </li>
               </ul>
@@ -554,13 +551,12 @@ const App: React.FC = () => {
               <ul className="list-disc list-inside space-y-1 pl-2">
                 <li>Sueldo fijo: S/ 1,500</li>
                 <li>
-                  Comisiones promedio: S/ 350 - 400 (sin tope,
-                  crecen con el estudio)
+                  Comisiones promedio: S/ 350 - 400 (sin tope, crecen con el
+                  estudio)
                 </li>
                 <li>
-                  Modalidad/Horario: presencial, tiempo
-                  completo, 45 horas/sem, 06 días Lunes a
-                  Sábado. Trabajar en Jesús María.
+                  Modalidad/Horario: presencial, tiempo completo, 45 horas/sem,
+                  06 días Lunes a Sábado. Trabajar en Jesús María.
                 </li>
               </ul>
             </div>
@@ -598,3 +594,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
