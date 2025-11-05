@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface CollapsibleFieldsetProps {
   title: string;
@@ -7,30 +7,41 @@ interface CollapsibleFieldsetProps {
   children: React.ReactNode;
 }
 
-const CollapsibleFieldset: React.FC<CollapsibleFieldsetProps> = ({ title, isOpen, onToggle, children }) => {
+const CollapsibleFieldset: React.FC<CollapsibleFieldsetProps> = ({
+  title,
+  isOpen,
+  onToggle,
+  children,
+}) => {
   return (
-    <fieldset className="overflow-hidden">
-      <legend 
-        className="w-full text-xl font-semibold text-gray-800 border-b-2 border-pink-200 pb-2 mb-6 flex justify-between items-center cursor-pointer select-none"
+    <fieldset className="border border-pink-100 rounded-xl overflow-hidden bg-pink-50/40">
+      {/* Cabecera clickable */}
+      <button
+        type="button"
         onClick={onToggle}
+        className="w-full flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-pink-50 hover:bg-pink-100 transition-colors"
         aria-expanded={isOpen}
       >
-        <span>{title}</span>
-        <svg
-          className={`w-6 h-6 text-pink-500 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
+        <legend className="m-0 text-left text-base sm:text-lg font-semibold text-gray-800">
+          {title}
+        </legend>
+
+        <span
+          className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-pink-300 text-pink-600 bg-white text-sm font-bold"
+          aria-hidden="true"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </legend>
-      <div 
-        className={`transition-all duration-500 ease-in-out grid ${isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}
+          {isOpen ? "−" : "+"}
+        </span>
+      </button>
+
+      {/* Contenido colapsable */}
+      <div
+        className={`transition-all duration-300 ease-in-out ${
+          isOpen ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
-        <div className="overflow-hidden">
-         {children}
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6 pt-2 sm:pt-3">
+          {children}
         </div>
       </div>
     </fieldset>
@@ -38,3 +49,4 @@ const CollapsibleFieldset: React.FC<CollapsibleFieldsetProps> = ({ title, isOpen
 };
 
 export default CollapsibleFieldset;
+
