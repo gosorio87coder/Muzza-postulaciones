@@ -2,7 +2,8 @@ import { useEffect } from "react";
 
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void;
+    fbq?: any;
+    _fbq?: any;
   }
 }
 
@@ -15,26 +16,37 @@ export const useMetaPixel = () => {
       return;
     }
 
-    // Si ya cargamos el script antes, solo hacemos un PageView adicional y salimos
-    const existingScript = document.getElementById("meta-pixel-script");
-    if (existingScript) {
-      if (window.fbq) {
-        window.fbq("track", "PageView");
-      }
+    // Si ya existe fbq (por recarga o StrictMode), solo trackeamos un PageView
+    if (window.fbq && window.fbq.loaded) {
+      window.fbq("track", "PageView");
       return;
     }
 
+    // Stub mínimo de fbq para que fbevents.js lo use cuando cargue
+    (function (f: any) {
+      const fbq = function (...args: any[]) {
+        fbq.callMethod ? fbq.callMethod(...args) : fbq.queue.push(args);
+      };
+      fbq.queue = [];
+      fbq.loaded = true;
+      fbq.version = "2.0";
+      fbq.callMethod = null;
+
+      f.fbq = fbq;
+      f._fbq = fbq;
+    })(window);
+
+    // Cargar el script de Meta Pixel
     const script = document.createElement("script");
-    script.id = "meta-pixel-script";
     script.async = true;
     script.src = "https://connect.facebook.net/en_US/fbevents.js";
 
     script.onload = () => {
-      if (window.fbq) {
-        window.fbq("init", pixelId);
-        window.fbq("track", "PageView");
-      } else {
-        console.warn("Meta Pixel script cargado pero window.fbq no está disponible.");
+      try {
+        window.fbq!("init", pixelId);
+        window.fbq!("track", "PageView");
+      } catch (e) {
+        console.error("Error al inicializar Meta Pixel:", e);
       }
     };
 
@@ -45,4 +57,5 @@ export const useMetaPixel = () => {
     document.head.appendChild(script);
   }, []);
 };
+
 
