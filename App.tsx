@@ -12,6 +12,7 @@ import TextInput from "./components/TextInput";
 import TextArea from "./components/TextArea";
 import Spinner from "./components/Spinner";
 import CollapsibleFieldset from "./components/CollapsibleFieldset";
+import { useMetaPixel } from "./hooks/useMetaPixel";
 
 const initialFormData: FormData = {
   fullName: "",
@@ -35,6 +36,9 @@ type OpenSections = {
 };
 
 const App: React.FC = () => {
+  // Inicializa el pixel de Meta
+  useMetaPixel();
+
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [questions, setQuestions] = useState<InterviewQuestions | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -199,6 +203,13 @@ const App: React.FC = () => {
       });
 
       if (response.ok) {
+        // Evento de Lead en Meta Pixel
+        if (window.fbq) {
+          window.fbq("track", "Lead", {
+            source: "Muzza Postulación",
+          });
+        }
+
         setSubmitted(true);
       } else {
         const errorData = await response.json().catch(() => null);
